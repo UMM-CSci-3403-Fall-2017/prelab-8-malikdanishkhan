@@ -14,14 +14,14 @@ public class ThreadedSearch<T> implements Runnable {
   }
 
   private ThreadedSearch(T target, ArrayList<T> list, int begin, int end, Answer answer) {
-    this.target=target;
-    this.list=list;
-    this.begin=begin;
-    this.end=end;
-    this.answer=answer;
+    target=target;
+    list=list;
+    begin=begin;
+    end=end;
+    answer=answer;
   }
 
-  public boolean parSearch(int numThreads, T target, ArrayList<T> list) throws{
+  public boolean parSearch(int numThreads, T target, ArrayList<T> list){
     int section = list.size()/numThreads;
     Thread[] thread = new Thread[numThreads];
     ArrayList<Answer> result = new ArrayList<Answer>();
@@ -30,17 +30,17 @@ public class ThreadedSearch<T> implements Runnable {
     end = section;
 
     for(int i = 0; i < numThreads; ++i){
-       results.add(new Answer());
-       thread[i] = new Thread(new ThreadedSearch<T>(target,list,begin,end,results.get(i)));
+       result.add(new Answer());
+       thread[i] = new Thread(new ThreadedSearch<T>(target,list,begin,end,result.get(i)));
 
        thread[i].start();
        begin = begin + section;
        end = end + section;       
     }
 
-     for(int j = 0; i < numThreads; ++j){
+     for(int j = 0; j < numThreads; ++j){
         try {
-            thread[i].join();
+            thread[j].join();
             } catch (InterruptedException e) {
             e.printStackTrace();
             }
@@ -56,13 +56,13 @@ public class ThreadedSearch<T> implements Runnable {
 
   @SuppressWarnings("unused")
   public void run() {
-  search(this.target,this.list,this.start,this.end);
+  search(target,list,begin,end);
   }
   
   private void search(T target, ArrayList<T> list, int start, int end){
    for(int j = start; j < end; j++ ){
       if(list.get(j).equals(target)){
-         answer = true;
+         answer.answer = true;
        }
    }
   }

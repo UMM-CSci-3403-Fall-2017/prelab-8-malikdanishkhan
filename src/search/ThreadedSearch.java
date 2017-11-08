@@ -14,25 +14,23 @@ public class ThreadedSearch<T> implements Runnable {
   }
 
   private ThreadedSearch(T target, ArrayList<T> list, int begin, int end, Answer answer) {
-    target=target;
-    list=list;
-    begin=begin;
-    end=end;
-    answer=answer;
+    this.target=target;
+    this.list=list;
+    this.begin=begin;
+    this.end=end;
+    this.answer=answer;
   }
 
   public boolean parSearch(int numThreads, T target, ArrayList<T> list){
     int section = list.size()/numThreads;
     Thread[] thread = new Thread[numThreads];
-    ArrayList<Answer> result = new ArrayList<Answer>();
+   
 
     begin = 0;
     end = section;
 
     for(int i = 0; i < numThreads; ++i){
-       result.add(new Answer());
-       thread[i] = new Thread(new ThreadedSearch<T>(target,list,begin,end,result.get(i)));
-
+       thread[i] = new Thread(new ThreadedSearch<T>(target,list,begin,end,answer));
        thread[i].start();
        begin = begin + section;
        end = end + section;       
@@ -45,30 +43,28 @@ public class ThreadedSearch<T> implements Runnable {
             e.printStackTrace();
             }
        }
-
-     for(int k = 0; k < result.size(); k++ ){
-      if(result.get(k).answer){
-         return true;
-      }
-     }
-    return false;
+    return answer.getAnswer();
   }
 
-  @SuppressWarnings("unused")
   public void run() {
-  search(target,list,begin,end);
+   for (int a = 0; a < end; ++a) {
+          if (list.get(a).equals(target)) {
+              answer.setAnswer(true);
+              break;
+          }
+      }
   }
-  
-  private void search(T target, ArrayList<T> list, int start, int end){
-   for(int j = start; j < end; j++ ){
-      if(list.get(j).equals(target)){
-         answer.answer = true;
-       }
-   }
-  }
-
+ 
   private class Answer {
     public boolean answer = false;
+  
+    public boolean getAnswer() {
+      return answer;
+    }
+    // This has to be synchronized to ensure that no two threads modify
+    // this at the same time, possibly causing race conditions.
+    public synchronized void setAnswer(boolean newAnswer) {
+      answer = newAnswer;
+    }
   }
-
 }
